@@ -1,0 +1,177 @@
+GREEN = "\033[92m"
+YELLOW = "\033[93m"
+BLUE = "\033[94m"
+RED = "\033[91m"
+RESET = "\033[0m"
+
+def calculate_grade(average):
+    if average >= 90:
+        return "A", "Excellent! Keep up the great work!", GREEN
+    elif average >= 80:
+        return "B", "Very Good! You're doing well.", BLUE
+    elif average >= 70:
+        return "C", "Good. Room for improvement.", YELLOW
+    elif average >= 60:
+        return "D", "Needs Improvement. Please study more.", YELLOW
+    else:
+        return "F", "Failed. Please seek help from teacher.", RED
+
+
+def get_valid_number(prompt, min_val=0, max_val=100):
+    while True:
+        try:
+            value = float(input(prompt))
+            if min_val <= value <= max_val:
+                return value
+            else:
+                print(f"Please enter a number between {min_val} and {max_val}.")
+        except ValueError:
+            print("Invalid input! Please enter a number.")
+
+
+def get_positive_integer(prompt):
+    while True:
+        try:
+            value = int(input(prompt))
+            if value > 0:
+                return value
+            print("Please enter a positive number.")
+        except ValueError:
+            print("Invalid input! Please enter a whole number.")
+
+def collect_students():
+    students = []
+
+    num_students = get_positive_integer("Enter number of students: ")
+
+    for i in range(num_students):
+        print(f"\n=== STUDENT {i + 1} ===")
+
+        name = input("Student name: ").strip()
+        while not name:
+            print("Name cannot be empty.")
+            name = input("Student name: ").strip()
+
+        print("Enter marks (0-100):")
+        math = get_valid_number("Math: ")
+        science = get_valid_number("Science: ")
+        english = get_valid_number("English: ")
+
+        average = (math + science + english) / 3
+        grade, comment, color = calculate_grade(average)
+
+        students.append({
+            "name": name,
+            "marks": [math, science, english],
+            "average": average,
+            "grade": grade,
+            "comment": comment,
+            "color": color
+        })
+
+    return students
+
+
+def display_results(students):
+    if not students:
+        print("No student data available.")
+        return
+
+    print("\n" + "=" * 60)
+    print("                 RESULTS SUMMARY")
+    print("=" * 60)
+    print(f"{'Name':<20} | {'Avg':>5} | {'Grade':^5} | Comment")
+    print("-" * 60)
+
+    for s in students:
+        print(
+            f"{s['name']:<20} | "
+            f"{s['average']:>5.1f} | "
+            f"{s['color']}{s['grade']:^5}{RESET} | "
+            f"{s['comment']}"
+        )
+
+
+def display_statistics(students):
+    averages = [s["average"] for s in students]
+    class_avg = sum(averages) / len(averages)
+
+    highest = max(students, key=lambda s: s["average"])
+    lowest = min(students, key=lambda s: s["average"])
+
+    print("\n" + "=" * 60)
+    print("                 CLASS STATISTICS")
+    print("=" * 60)
+    print(f"Total Students : {len(students)}")
+    print(f"Class Average  : {class_avg:.1f}")
+    print(f"Highest Avg    : {highest['average']:.1f} ({highest['name']})")
+    print(f"Lowest Avg     : {lowest['average']:.1f} ({lowest['name']})")
+
+
+def search_student(students):
+    name = input("Enter student name to search: ").strip().lower()
+    found = False
+
+    for s in students:
+        if s["name"].lower() == name:
+            found = True
+            print("\nStudent Found:")
+            print(f"Name    : {s['name']}")
+            print(f"Average : {s['average']:.1f}")
+            print(f"Grade   : {s['grade']}")
+            print(f"Comment : {s['comment']}")
+
+    if not found:
+        print("Student not found.")
+
+
+def save_to_file(students, filename="results_sample.txt"):
+    with open(filename, "w") as file:
+        file.write("STUDENT GRADE RESULTS\n")
+        file.write("=" * 50 + "\n")
+
+        for s in students:
+            file.write(
+                f"{s['name']} | "
+                f"Avg: {s['average']:.1f} | "
+                f"Grade: {s['grade']} | "
+                f"{s['comment']}\n"
+            )
+
+    print(f"Results saved to '{filename}' successfully.")
+
+def main():
+    students = []
+
+    while True:
+        print("\n" + "=" * 50)
+        print("        STUDENT GRADE CALCULATOR")
+        print("=" * 50)
+        print("1. Enter student data")
+        print("2. View results")
+        print("3. View class statistics")
+        print("4. Search for a student")
+        print("5. Save results to file")
+        print("6. Exit")
+
+        choice = input("Choose an option (1-6): ")
+
+        if choice == "1":
+            students = collect_students()
+        elif choice == "2":
+            display_results(students)
+        elif choice == "3":
+            display_statistics(students)
+        elif choice == "4":
+            search_student(students)
+        elif choice == "5":
+            save_to_file(students)
+        elif choice == "6":
+            print("Thank you for using the Grade Calculator!")
+            break
+        else:
+            print("Invalid choice. Please select 1–6.")
+
+
+if __name__ == "__main__":
+    main()
